@@ -1,18 +1,15 @@
 package shop.mtcoding.blog.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+@RequiredArgsConstructor
 @Repository
 public class UserRepository {
-    private EntityManager em;
-
-    public UserRepository(EntityManager em) {
-        this.em = em;
-    }
+    private final EntityManager em;
 
     @Transactional
     public void save(UserRequest.JoinDTO requestDTO){
@@ -29,5 +26,17 @@ public class UserRepository {
         query.setParameter(2, requestDTO.getPassword());
         User user = (User) query.getSingleResult();
         return user;
+    }
+
+    public User findByUsername(String username) {
+        Query query = em.createNativeQuery("select * from user_tb where username=?", User.class);
+        query.setParameter(1, username);
+
+        try {
+            User user = (User) query.getSingleResult();
+            return user;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

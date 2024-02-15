@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpSession;
 
+
 @Controller
 public class UserController {
     private final UserRepository userRepository;
@@ -37,14 +38,19 @@ public class UserController {
         System.out.println(requestDTO);
 
         if (requestDTO.getUsername().length() < 3) {
-            System.out.println("안되나??");
             return "error/400";
-        } else if (requestDTO.getPassword().length() > 40) {
-            return "error/400";
-        } else {
-            userRepository.save(requestDTO);
-            return "redirect:/loginForm";
         }
+        if (requestDTO.getPassword().length() > 40) {
+            return "error/400";
+        }
+        User user = userRepository.findByUsername(requestDTO.getUsername());
+        if (user ==null){
+            //모델에게 위임하기
+            userRepository.save(requestDTO);
+        } else {
+            return "error/400";
+        }
+        return "redirect:/loginForm";
     }
 
     @GetMapping("/joinForm")
@@ -64,6 +70,7 @@ public class UserController {
 
     @GetMapping("/logout")
     public String logout() {
+        session.invalidate();
         return "redirect:/";
     }
 }
